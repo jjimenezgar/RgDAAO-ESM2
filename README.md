@@ -1,75 +1,82 @@
 # RgDAAO-ESM2
 
-A small, reproducible benchmark for adapting ESM-2 to predict experimentally measured mutational effects on *Rhodotorula gracilis* D-amino acid oxidase (RgDAAO).
+[![tests](https://github.com/jjimenezgar/RgDAAO-ESM2/actions/workflows/tests.yml/badge.svg)](https://github.com/jjimenezgar/RgDAAO-ESM2/actions/workflows/tests.yml)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/jjimenezgar/RgDAAO-ESM2/blob/main/notebooks/RgDAAO_ESM2_benchmark.ipynb)
 
-## Scope
+A focused supervised protein language model benchmark: **does fine-tuning ESM-2
+improve prediction of experimental RgDAAO mutation effects over a frozen backbone?**
 
-This repository does **not** introduce a new protein language model or claim a new enzyme-engineering method. Its purpose is to compare two established transfer-learning strategies on an enzyme deep-mutational-scanning dataset:
+*Rhodotorula gracilis* D-amino acid oxidase is a flavoprotein biocatalyst that
+oxidizes D-amino acids. This project uses the EP-Seq D-alanine activity assay
+from [Vanella et al., Nature Communications (2024)](https://doi.org/10.1038/s41467-024-45630-3).
+It compares established transfer-learning strategies; it introduces no new model
+or enzyme-engineering method.
 
-1. **Frozen ESM-2** — extract sequence representations and train only a regression head.
-2. **Fine-tuned ESM-2** — update part or all of the pretrained model together with the regression head.
+## Dataset
 
-The primary target is experimental enzymatic activity. Model predictions are computational estimates and are not substitutes for experimental validation.
+**6,399 paired single-missense variants**, reproduced from the authors'
+[Zenodo deposit](https://doi.org/10.5281/zenodo.8388902). Input: 365-residue mutated
+sequence. Target: direct experimental activity fitness relative to WT.
 
-## Biological system
+The target is `2309_Figure_2.xlsx` → `Fig2_H` → `activity  score`, joined with
+expression measurements to reproduce the paper's cohort. It is **not** the
+activity/expression-normalized hotspot score. Every mutation is checked against
+the coding sequence in `DAOx_ref.fa`; no numbering corrections are inferred.
+[Exact provenance, filters and audit caveats](data/README.md).
 
-RgDAAO is a flavoprotein D-amino acid oxidase from *Rhodotorula gracilis*. Structural interpretation can use PDB **1C0P**, which contains RgDAAO with FAD and a bound active-site ligand.
+## Comparison
 
-## Planned benchmark
+| | Frozen ESM-2 | Fine-tuned ESM-2 |
+|---|---|---|
+| Backbone | Frozen | Trainable |
+| Regression head | Trainable | Same head, trainable |
+| Trainable parameters | 103,041 | 7,840,442 |
+| Model | `facebook/esm2_t6_8M_UR50D` | Same pinned revision |
 
-- Experimental missense-variant data
-- Reproducible train/validation/test partitions
-- Frozen ESM-2 baseline
-- ESM-2 fine-tuning with PyTorch
-- Pearson and Spearman correlation, MAE and RMSE
-- Saved predictions and machine-readable metrics
-- Optional structural mapping of prediction errors after the core benchmark is validated
+Both use seed 42 and identical **5,119 / 639 / 641** train/validation/test splits.
+The head initialization, head learning rate, batch size and 20-epoch budget are
+shared. Checkpoints are selected by validation **Spearman**; test evaluation
+happens only after both models finish training. Pearson, MAE and RMSE are also
+reported. [Full protocol](docs/benchmark.md).
 
 ## Status
 
-**V0.1 — pipeline scaffold.** Data validation, deterministic splitting, regression metrics, configuration and tests are implemented. No benchmark numbers are reported yet: results will only be added after training on the documented experimental dataset.
+Dataset preparation, deterministic splits, training/evaluation and Colab workflow
+are implemented. **The real pretrained smoke test passes in both modes.**
+Full benchmark training is pending GPU execution; no scientific performance
+numbers or improvement claim are reported. The smoke test is a software check.
 
-## Quick start
+## Reproduce
+
+Python 3.10+; a GPU is recommended for the complete comparison. The Colab link
+above runs this repository in two cells. Locally:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
-pytest
+pip install -e ".[ml,dev]"
+python scripts/download_data.py
+python scripts/build_dataset.py
+python -m rgdaao.prepare --input data/processed/variants.csv --output data/processed
+python scripts/smoke_test.py
+bash scripts/run_benchmark.sh
 ```
 
-Prepare a CSV with at least:
+The runner saves selected checkpoints, configuration, software environment,
+validation history, test metrics and `predictions.csv` per model. Scientific
+figures and `comparison.csv` are generated only after real test evaluation.
+Outputs go to `results/`; keep that folder or download the Colab results ZIP.
 
-```text
-mutated_sequence,activity
-...
-```
+Lightweight CI needs only `pip install -e ".[dev]"` and `pytest -q`; it never
+downloads pretrained weights or trains ESM-2. A separate data workflow verifies
+the processed deposit and rebuilds the dataset. Optional ML tests use a tiny
+random model offline. [Committed audit records](docs/audit/).
 
-Then validate and split it:
+## Interpretation
 
-```bash
-python -m rgdaao.prepare --input data/raw/rgdaao.csv --output data/processed
-```
-
-Training code for ESM-2 is intentionally kept separate from CI because model weights and GPU training are comparatively expensive.
-
-## Reproducibility principles
-
-- fixed random seeds;
-- train/validation/test separation before model fitting;
-- no test-set model selection;
-- explicit dataset provenance;
-- machine-readable outputs;
-- no biological claim from model predictions alone.
-
-## References
-
-The experimental dataset comes from Vanella et al., *Nature Communications* (2024), DOI: 10.1038/s41467-024-45630-3. The study measured expression/folding and catalytic-activity fitness for thousands of RgDAAO variants using enzyme proximity sequencing (EP-Seq). The authors deposited the data and analysis code in Zenodo record **8388902**. The activity assay used D-alanine as substrate.
-
-This repository does not redistribute the raw experimental dataset until the exact source table and transformation into `mutated_sequence,activity` are documented and verified.
-
-### Primary source
-
-Vanella R. et al. (2024). *Understanding activity-stability tradeoffs in biocatalysts by enzyme proximity sequencing*. Nature Communications 15, 1807. DOI: 10.1038/s41467-024-45630-3.
-
-Data: Zenodo record 8388902. Structure: PDB 1C0P.
+Random single-variant splitting measures interpolation within one enzyme and
+can share mutated positions across splits. EP-Seq activity depends on cellular
+expression/folding as well as catalysis; it is not purified-enzyme kinetics.
+One split/seed cannot establish broad generalization, and model predictions do
+not demonstrate experimentally improved enzymes. The full comparison will be
+reported whether fine-tuning improves, matches or worsens the baseline.

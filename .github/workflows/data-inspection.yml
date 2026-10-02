@@ -4,8 +4,13 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "scripts/download_data.py"
-      - "scripts/inspect_processed_data.py"
+      - "scripts/*data*.py"
+      - "scripts/profile_processed_tables.py"
+      - "src/rgdaao/epseq.py"
+      - "src/rgdaao/source.py"
+      - "src/rgdaao/mutations.py"
+      - "src/rgdaao/prepare.py"
+      - "pyproject.toml"
       - ".github/workflows/data-inspection.yml"
 
 jobs:
@@ -16,6 +21,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
+      - name: Install lightweight data dependencies
+        run: python -m pip install -e .
       - name: Download deposited processed resources
         run: python scripts/download_data.py
       - name: Show manifest
@@ -24,3 +32,13 @@ jobs:
         run: python scripts/inspect_processed_data.py
       - name: Profile processed tables
         run: python scripts/profile_processed_tables.py
+      - name: Reproduce validated dataset and splits
+        run: |
+          python scripts/build_dataset.py
+          python -m rgdaao.prepare --input data/processed/variants.csv --output data/processed
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dataset-audit
+          path: |
+            data/processed/provenance.json
+            data/processed/split_summary.json

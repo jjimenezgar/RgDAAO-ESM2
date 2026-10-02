@@ -16,3 +16,19 @@ def test_split_is_deterministic_and_disjoint():
     assert sets[0].isdisjoint(sets[2])
     assert sets[1].isdisjoint(sets[2])
     assert sum(map(len, a)) == len(df)
+
+
+import pytest
+
+
+@pytest.mark.parametrize('train,val', [(0.9, 0.1), (0.8, 0), (1.2, 0.1), (0.8, float('nan'))])
+def test_invalid_split_fractions(train, val):
+    with pytest.raises(ValueError):
+        random_split(pd.DataFrame({'x': range(100)}), train, val)
+
+
+def test_real_dataset_split_sizes():
+    splits = random_split(pd.DataFrame({'id': range(6399)}), seed=42)
+    assert [len(x) for x in splits] == [5119, 639, 641]
+    other = random_split(pd.DataFrame({'id': range(6399)}), seed=43)
+    assert not splits[0].equals(other[0])

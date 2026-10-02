@@ -10,3 +10,6 @@ results/*
 !results/.gitkeep
 checkpoints/
 .DS_Store
+data/source/
+*.egg-info/
+.ipynb_checkpoints/
