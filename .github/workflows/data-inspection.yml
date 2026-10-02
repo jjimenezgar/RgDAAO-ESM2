@@ -22,3 +22,5 @@ jobs:
         run: cat data/source/manifest.json
       - name: Inspect processed archives
         run: python scripts/inspect_processed_data.py
+      - name: Profile processed tables
+        run: python scripts/profile_processed_tables.py
