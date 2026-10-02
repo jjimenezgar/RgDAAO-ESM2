@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rgdaao-esm2"
+version = "0.1.0"
+description = "Reproducible ESM-2 fine-tuning benchmark for RgDAAO mutational activity"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=2.0",
+  "scikit-learn>=1.3",
+  "scipy>=1.10",
+  "pyyaml>=6.0"
+]
+
+[project.optional-dependencies]
+ml = [
+  "torch>=2.1",
+  "transformers>=4.40"
+]
+dev = [
+  "pytest>=8.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
