@@ -1,0 +1,11 @@
+model:
+  name: facebook/esm2_t6_8M_UR50D
+  freeze_backbone: true
+
+training:
+  seed: 42
+  learning_rate: 0.001
+  epochs: 20
+  batch_size: 16
+
+target: activity
