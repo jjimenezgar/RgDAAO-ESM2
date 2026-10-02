@@ -1,0 +1,24 @@
+name: inspect-experimental-data
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/download_data.py"
+      - "scripts/inspect_processed_data.py"
+      - ".github/workflows/data-inspection.yml"
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Download deposited processed resources
+        run: python scripts/download_data.py
+      - name: Show manifest
+        run: cat data/source/manifest.json
+      - name: Inspect processed archives
+        run: python scripts/inspect_processed_data.py
