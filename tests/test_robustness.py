@@ -161,3 +161,42 @@ def test_runner_trains_entire_suite_before_test_and_resumes(prepared, tmp_path, 
     events.clear()
     runpy.run_path('scripts/run_robustness.py', run_name='__main__')
     assert events == []  # Completed test evaluations are never repeated.
+
+
+def test_colab_prepares_training_csv_before_smoke(source, tmp_path, monkeypatch):
+    """Execute the actual plan cell with local preparation and a lightweight smoke probe."""
+    import runpy
+    import sys
+    from rgdaao.data import load_variants
+    from rgdaao.source import read_fasta
+    repo_root = Path.cwd()
+    notebook = json.loads((repo_root / 'notebooks/RgDAAO_ESM2_robustness.ipynb').read_text())
+    cells = [''.join(c['source']) for c in notebook['cells'] if c['cell_type'] == 'code']
+    assert 'scripts/smoke_test.py' not in cells[0]
+    plan_cell = next(c for c in cells if 'STRATEGIES = ' in c)
+    data = tmp_path / 'data/processed'; data.mkdir(parents=True)
+    for name in ('variants.csv', 'provenance.json', 'wt.fasta'):
+        shutil.copyfile(source.parent / name, data / name)
+    shutil.copytree(repo_root / 'configs', tmp_path / 'configs')
+    monkeypatch.chdir(tmp_path)
+    events = []
+
+    def run_visible(command):
+        if command[1] == 'scripts/run_robustness.py':
+            assert '--prepare-only' in command
+            monkeypatch.setattr(sys, 'argv', command[1:])
+            runpy.run_path(str(repo_root / command[1]), run_name='__main__')
+            events.append('prepared')
+        else:
+            assert command[1] == 'scripts/smoke_test.py' and events == ['prepared']
+            directory = Path(command[command.index('--data-dir') + 1])
+            training = load_variants(directory / 'train.csv', read_fasta(directory / 'wt.fasta'))
+            assert len(training) > 2
+            test = pd.read_csv(directory / 'test.csv')
+            assert set(training.head(2).mutation).isdisjoint(test.mutation)
+            assert directory == Path('results/robustness/data/position')
+            events.append('smoke')
+
+    exec(compile(plan_cell, 'robustness-colab-plan-cell', 'exec'),
+         {'Path': Path, 'sys': sys, 'run_visible': run_visible})
+    assert events == ['prepared', 'smoke']
