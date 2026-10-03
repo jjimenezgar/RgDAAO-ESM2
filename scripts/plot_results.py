@@ -17,11 +17,15 @@ def main():
     for mode in ('frozen', 'finetune'):
         directory = args.results_dir / f'esm2_{mode}'
         run = json.loads((directory / 'run.json').read_text())
-        if run.get('status') != 'evaluated' or run['n_test'] != 641:
+        if (run.get('status') != 'evaluated' or
+                run.get('n_test') != run['split_manifest']['n_test'] or
+                run['split_manifest']['n_total'] != 6399):
             raise ValueError('Figures require completed evaluation on the full held-out test set')
         if file_sha256(directory / 'predictions.csv') != run['predictions_sha256']:
             raise ValueError('Predictions changed after final evaluation')
         prediction = pd.read_csv(directory / 'predictions.csv')
+        if len(prediction) != run['n_test'] or not prediction.mutation.is_unique:
+            raise ValueError('Prediction count/identifiers disagree with the test manifest')
         metrics = regression_metrics(prediction.experimental_activity, prediction.predicted_activity)
         if any(not np.isclose(metrics[k], run['test_metrics'][k]) for k in metrics if metrics[k] is not None):
             raise ValueError('Saved metrics disagree with predictions')

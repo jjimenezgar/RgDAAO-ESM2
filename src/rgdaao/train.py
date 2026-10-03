@@ -11,6 +11,7 @@ from .dataset import ProteinRegressionDataset
 from .metrics import regression_metrics
 from .model import load_regression_model, trainable_parameters, make_optimizer
 from .source import read_fasta
+from .split import assert_position_disjoint
 from .training import set_seed, write_json, environment, file_sha256, assert_disjoint
 
 
@@ -29,8 +30,8 @@ def train(config, data_dir: Path, output: Path):
     set_seed(config['training']['seed'])
     summary = json.loads((data_dir / 'split_summary.json').read_text())
     provenance = json.loads((data_dir / 'provenance.json').read_text())
-    if summary['seed'] != config['training']['seed']:
-        raise ValueError('Configuration seed differs from split seed')
+    if config['training']['seed'] not in summary.get('training_seeds', [summary['seed']]):
+        raise ValueError('Configuration seed is not authorized by the split manifest')
     if not provenance['counts']['matches_paper_count']:
         raise ValueError('Resolve the dataset count discrepancy before running this benchmark')
     if provenance['dataset_sha256'] != summary['dataset_sha256']:
@@ -43,6 +44,8 @@ def train(config, data_dir: Path, output: Path):
             raise ValueError(f'Changed {name} split; regenerate or investigate')
         frames[name] = load_variants(path, wt)
     assert_disjoint(*frames.values())
+    if summary.get('split_strategy') == 'position':
+        assert_position_disjoint(*frames.values())
     tokenizer, model = load_regression_model(config['model']['name'], config['model']['freeze_backbone'], config['model']['revision'])
     trainable, total = trainable_parameters(model)
     output.mkdir(parents=True, exist_ok=True)

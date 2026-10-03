@@ -9,6 +9,7 @@ from .data import load_variants
 from .dataset import ProteinRegressionDataset
 from .model import load_regression_model
 from .source import read_fasta
+from .split import assert_position_disjoint
 from .training import assert_disjoint, file_sha256, save_evaluation, set_seed, write_json
 
 
@@ -31,6 +32,8 @@ def evaluate(run_dir: Path, data_dir: Path):
             raise ValueError(f'Changed {name} split')
         frames[name] = load_variants(path, wt)
     assert_disjoint(*frames.values())
+    if metadata['split_manifest'].get('split_strategy') == 'position':
+        assert_position_disjoint(*frames.values())
     test = frames['test']
     tokenizer, model = load_regression_model(
         freeze_backbone=config['model']['freeze_backbone'], checkpoint=run_dir / 'best_model')

@@ -1,6 +1,7 @@
 """Small, strict configuration checks; no ML imports."""
 from __future__ import annotations
 import math
+import json
 from pathlib import Path
 import yaml
 
@@ -41,7 +42,10 @@ def validate_config(config: dict) -> dict:
 
 
 def load_config(path: str | Path) -> dict:
-    return validate_config(yaml.safe_load(Path(path).read_text()))
+    path = Path(path)
+    # YAML 1.1 can treat JSON scientific notation such as 1e-05 as a string.
+    loader = json.loads if path.suffix == '.json' else yaml.safe_load
+    return validate_config(loader(path.read_text()))
 
 
 def check_comparison(frozen: dict, tuned: dict) -> None:

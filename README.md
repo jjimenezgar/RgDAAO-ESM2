@@ -64,6 +64,17 @@ substitutions; no exact variants or sequences overlap across splits.
 [Run evidence, learning curves and limitations](docs/results/seed42/README.md)
 include original predictions, metrics, configurations and execution records.
 
+## Robustness follow-up
+
+A separate protocol is ready for training seeds **42, 43, 44** on fixed random
+and position-held-out partitions. In the latter, whole residue positions are
+reserved for validation/test. It measures training variation and prediction at
+unseen mutation positions. **The new GPU runs are pending; no additional
+performance results are claimed.** The completed benchmark above is preserved.
+
+[Protocol and commands](docs/robustness.md) ·
+[Open robustness Colab](https://colab.research.google.com/github/jjimenezgar/RgDAAO-ESM2/blob/main/notebooks/RgDAAO_ESM2_robustness.ipynb)
+
 ## Reproduce
 
 Python 3.10+; a GPU is recommended for the complete comparison. The Colab link

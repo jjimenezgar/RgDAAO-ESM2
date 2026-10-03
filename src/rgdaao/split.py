@@ -2,6 +2,38 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from .mutations import parse_mutation
+
+
+def mutation_positions(frame: pd.DataFrame) -> set[int]:
+    return {parse_mutation(m)[1] for m in frame.mutation}
+
+
+def assert_position_disjoint(*frames: pd.DataFrame) -> None:
+    seen = set()
+    for frame in frames:
+        positions = mutation_positions(frame)
+        if seen & positions:
+            raise ValueError('Split leakage: overlapping mutation positions')
+        seen.update(positions)
+
+
+def position_split(df: pd.DataFrame, train_fraction: float = 0.8,
+                   val_fraction: float = 0.1, seed: int = 42):
+    """Allocate whole residue positions; fractions apply to groups, not rows.
+
+    Positions are sorted numerically before permutation. No activity labels
+    are used to select groups; row order is retained within each partition.
+    """
+    positions = np.array(sorted(mutation_positions(df)))
+    groups = random_split(pd.DataFrame({'position': positions}),
+                          train_fraction, val_fraction, seed)
+    row_positions = df.mutation.map(lambda m: parse_mutation(m)[1])
+    frames = tuple(df.loc[row_positions.isin(g.position)].reset_index(drop=True) for g in groups)
+    if min(map(len, frames)) < 2:
+        raise ValueError('Each split requires at least two observations for correlation')
+    assert_position_disjoint(*frames)
+    return frames
 
 
 def random_split(

@@ -37,7 +37,8 @@ def test_no_truncation(tiny_checkpoint):
         ProteinRegressionDataset(pd.DataFrame({'mutated_sequence': ['A'*600], 'activity': [0]}), tokenizer)
 
 
-def test_train_select_serialize_then_evaluate(tmp_path, tiny_checkpoint, monkeypatch):
+@pytest.mark.parametrize('training_seed', [42, 43])
+def test_train_select_serialize_then_evaluate(tmp_path, tiny_checkpoint, monkeypatch, training_seed):
     # Synthetic fixtures exercise control flow, not performance of ESM-2.
     import rgdaao.train as training
     from rgdaao.evaluate import evaluate
@@ -57,12 +58,15 @@ def test_train_select_serialize_then_evaluate(tmp_path, tiny_checkpoint, monkeyp
         frame.to_csv(data / f'{name}.csv', index=False)
     manifest = {'seed': 42, 'dataset_sha256': 'synthetic-fixture',
                 'split_sha256': {n: file_sha256(data / f'{n}.csv') for n in frames}}
+    if training_seed != 42:
+        manifest['training_seeds'] = [42, 43, 44]
     write_json(data / 'split_summary.json', manifest)
     write_json(data / 'provenance.json', {'dataset_sha256': 'synthetic-fixture',
                                          'counts': {'matches_paper_count': True}})
     test_bytes = (data / 'test.csv').read_bytes()
     (data / 'test.csv').unlink()  # training MUST succeed with no accessible test set
     config = load_config('configs/esm2_frozen.yaml')
+    config['training']['seed'] = training_seed
     config['training'].update(epochs=2, batch_size=2)
     output = tmp_path / 'experiment'
     training.train(config, data, output)

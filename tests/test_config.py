@@ -31,3 +31,11 @@ def test_wrong_target_and_unknown_keys():
     cfg['training']['test_for_selection'] = True
     with pytest.raises(ValueError):
         validate_config(cfg)
+
+
+def test_json_config_scientific_notation_roundtrip(tmp_path):
+    import json
+    original = load_config('configs/esm2_finetune.yaml')
+    path = tmp_path / 'config.json'
+    path.write_text(json.dumps(original))
+    assert load_config(path) == original

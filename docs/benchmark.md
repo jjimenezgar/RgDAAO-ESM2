@@ -105,5 +105,6 @@ purified-enzyme kinetics. Assay noise, expression-dependent activity and the
 upstream notebook caveats remain. The observed improvement is specific to this
 baseline and protocol; it is not a model-design or experimentally improved-enzyme
 claim.
-Multiple seeds and position-held-out splits are possible follow-ups after this
-fixed MVP, not substitutes for its first locked comparison.
+The [multi-seed and position-held-out follow-up](robustness.md) is now implemented
+as a separate protocol; its GPU runs are pending. It preserves this first locked
+comparison and its published evidence.
