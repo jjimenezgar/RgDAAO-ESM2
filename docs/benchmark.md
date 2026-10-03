@@ -82,16 +82,28 @@ updates and checkpoint round-trip. Optional offline integration tests use a tiny
 random ESM to verify training/selection/evaluation control flow. Neither check
 is a scientific benchmark.
 
-**Full benchmark training has not been run: this execution environment has no
-GPU. No held-out predictions, performance figures or fine-tuning improvement
-claim exist yet.** Use the repository-backed Colab notebook to complete it.
+The full benchmark completed on a Tesla T4 using clean repository commit
+`35ecc07130d70b10749f00b9ee0c8440622565a1`. Both modes completed 20 epochs
+(12,800 steps each). Training runtimes were approximately 18.9 minutes frozen
+and 41.2 minutes fine-tuned, excluding setup and final evaluation.
+The validation-selected checkpoints were epoch 20 (frozen) and epoch 18
+(fine-tuned), with validation Spearman 0.280 and 0.728, respectively.
+The final `best_validation.epoch` field is 20 in both run records because
+Trainer re-evaluated the restored model after training; `best_checkpoint`
+and the epoch history identify the actual selection epoch.
+
+Held-out Spearman was 0.201 frozen versus 0.716 fine-tuned; MAE was 0.244 versus
+0.145. [Complete recorded result](results/seed42/README.md) supplies all metrics,
+predictions, configurations, environment records and import verification.
+These are measured test results, separate from the software smoke check.
 
 This is one enzyme, one assay, one split and one seed. Random variant splitting
 allows different substitutions at the same position across sets and assesses
 interpolation within a nearly identical sequence family. It does not establish
 transfer to unseen positions, multiple mutations, new enzymes, substrates or
 purified-enzyme kinetics. Assay noise, expression-dependent activity and the
-upstream notebook caveats remain. Fine-tuning may help, have no benefit, or hurt;
-report the observed result without model-design or experimental-improvement claims.
+upstream notebook caveats remain. The observed improvement is specific to this
+baseline and protocol; it is not a model-design or experimentally improved-enzyme
+claim.
 Multiple seeds and position-held-out splits are possible follow-ups after this
 fixed MVP, not substitutes for its first locked comparison.

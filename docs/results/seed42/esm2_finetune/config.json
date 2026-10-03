@@ -1,0 +1,16 @@
+{
+  "model": {
+    "name": "facebook/esm2_t6_8M_UR50D",
+    "revision": "c731040fcd8d73dceaa04b0a8e6329b345b0f5df",
+    "freeze_backbone": false
+  },
+  "training": {
+    "seed": 42,
+    "learning_rate": 1e-05,
+    "head_learning_rate": 0.001,
+    "epochs": 20,
+    "batch_size": 8,
+    "weight_decay": 0.01
+  },
+  "target": "activity"
+}

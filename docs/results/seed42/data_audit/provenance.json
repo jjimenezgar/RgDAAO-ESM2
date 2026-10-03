@@ -1,0 +1,43 @@
+{
+  "zenodo_record": "8388902",
+  "paper_doi": "10.1038/s41467-024-45630-3",
+  "source_file": "Figures_data.zip::Figures_data/2309_Figure_2.xlsx",
+  "activity": {
+    "sheet": "Fig2_H",
+    "column": "activity  score"
+  },
+  "expression": {
+    "sheet": "Fig2_F",
+    "column": "expression score",
+    "role": "auxiliary only"
+  },
+  "filtering": "tag=missense in each assay; inner join on stripped DAOx variant; validate all mutations",
+  "label_transformations": "none; deposited consensus log2 fitness relative to WT",
+  "mutation_notation": "one-based RgDAAO A123V; no 104-residue offset applied to figure tables",
+  "wt_sequence": "MHSQKRVVVLGSGVIGLSSALILARKGYSVHILARDLPEDVSSQTFASPWAGANWTPFMTLTDGPRQAKWEESTFKKWVELVPTGHAMWLKGTRRFAQNEDGLLGHWYKDITPNYRPLPSSECPPGAIGVTYDTLSVHAPKYCQYLARELQKLGATFERRTVTSLEQAFDGADLVVNATGLGAKSIAGIDDQAAEPIRGQTVLVKSPCKRCTMDSSDPASPAYIIPRPGGEVICGGTYGVGDWDLSVNPETVQRILKHCLRLDPTISSDGTIEGIEVLRHNVGLRPARRGGPRVEAERIVLPLDRTKSPLSLGRGSARAAKEKEVTLVHAYGFSSAGYQQSWGAAEDVAQLVDEAFQRYHGAARE",
+  "sequence_length": 365,
+  "reference": "DAOx_ref.fa DNA, nts 912\u20132006 inclusive, standard genetic code; BamHI/XhoI boundaries",
+  "source_sha256": {
+    "DAOx_ref.fa": "8dcb2a22ab0f3a93bfbdbc7a105164b454d3a08ad67c665ac52b59a12b09d7ed",
+    "Figures_data.zip": "daef37daffd13df6f051476e75fb35de463161a32f9dcf7c70e32a6aa64fd6f9"
+  },
+  "dataset_sha256": "42d863a843d172036cc4f019ea40ec2c67a3834b7ead3307f261d888ac3aec76",
+  "counts": {
+    "activity_source_classes": {
+      "missense": 6404,
+      "nonsense": 332,
+      "synonymous": 300
+    },
+    "expression_source_classes": {
+      "missense": 6434,
+      "nonsense": 334,
+      "synonymous": 301
+    },
+    "activity_only_missense": 5,
+    "expression_only_missense": 35,
+    "paired_missense": 6399,
+    "expected_paper_count": 6399,
+    "matches_paper_count": true,
+    "supplemental_crosscheck": "FigS6_A identities and both labels agree (atol=1e-12)"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "archive_name": "RgDAAO-ESM2-results.zip",
+  "archive_sha256": "8cae152fe0a9d82f336342ae0c19e846a1a863414d1758863290438d6bb4e4eb",
+  "training_git_commit": "35ecc07130d70b10749f00b9ee0c8440622565a1",
+  "source_files_sha256": {
+    "comparison.csv": "6f125b22d98256124f07edb123cba6ac4803cee30c9f8acacbcee3e5f7041396",
+    "figures/activity_predictions.png": "90c1c2cc9ef1bce7486b509d10bef0f0667a87c46609c6e5e225c1d47935af5f",
+    "figures/activity_predictions.pdf": "8a99eb956c7db236042a6f4e9f9d045b20a9f824e5daa18e82247b0339d65e3f",
+    "data_audit/provenance.json": "f66b9e1210963d6dca010832f7c12524c2d3a9d5c14dc39cb03c0284a740a6a7",
+    "data_audit/split_summary.json": "13516120b647a6230a2a3c6e6de6d7a04a623055af34c9dd8fddef82309f72dc",
+    "esm2_frozen/config.json": "a749f03961c452f00ea9a1863debb7eb37bc291c9f183b637d2a3c0b899f12d7",
+    "esm2_frozen/environment.json": "283b2e9216f6590c4f7a3f16b3295a5e9db06cc81a65b2fe2cd10f3862f5462c",
+    "esm2_frozen/pip-freeze.txt": "3b7ce3471f51e2b8decf752f7826e826c277a7c455eab4519f8c2e86d443dfd2",
+    "esm2_frozen/run.json": "0634f8b1db92c8c88c8c6c52a75ead403d38a10476fee0610645ab7637b7567e",
+    "esm2_frozen/history.json": "293df7756dd8558d4a10aa234136ad771cf3954120309020cc4cdeabdcfa5685",
+    "esm2_frozen/metrics.json": "f3b15db5feafc197a7c8df6b2dd0db801f611687f95bbf17e6f8ead3d6f22b38",
+    "esm2_frozen/predictions.csv": "bcefcf04889901a6761b20ea5eb2d697a0b8e9d97cbdbf70b110c1d111977f01",
+    "esm2_finetune/config.json": "cb9d39fe28b4118379eafb18789e722a6ffb26e2c6adf414c648e16ea224686e",
+    "esm2_finetune/environment.json": "283b2e9216f6590c4f7a3f16b3295a5e9db06cc81a65b2fe2cd10f3862f5462c",
+    "esm2_finetune/pip-freeze.txt": "3b7ce3471f51e2b8decf752f7826e826c277a7c455eab4519f8c2e86d443dfd2",
+    "esm2_finetune/run.json": "ad419b401dbe04ea28b82c4fd7b238438737f66ca0c457ba6fc606cdde3dd6b2",
+    "esm2_finetune/history.json": "1cb9ee9751dcd0ad085dac273f44417ced0fd2e5cc20d08ac44825f48aa7ba14",
+    "esm2_finetune/metrics.json": "a21425b84e0e036ad7d35252a412b472822b9f94ee003b0e815ddc904959dd61",
+    "esm2_finetune/predictions.csv": "c7dbe55bde759c4c952215605d4aeda8f0908e03305bcda43518bf88b549cec2"
+  },
+  "checks": {
+    "checkpoint_hashes_match": true,
+    "dataset_and_split_hashes_match": true,
+    "predictions_match_test_order_and_labels": true,
+    "cross_split_overlap": {
+      "train_val": {
+        "mutation": 0,
+        "mutated_sequence": 0
+      },
+      "train_test": {
+        "mutation": 0,
+        "mutated_sequence": 0
+      },
+      "val_test": {
+        "mutation": 0,
+        "mutated_sequence": 0
+      }
+    },
+    "test_positions": 310,
+    "test_positions_also_in_train": 310
+  }
+}

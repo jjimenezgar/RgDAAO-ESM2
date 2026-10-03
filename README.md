@@ -39,12 +39,30 @@ shared. Checkpoints are selected by validation **Spearman**; test evaluation
 happens only after both models finish training. Pearson, MAE and RMSE are also
 reported. [Full protocol](docs/benchmark.md).
 
-## Status
+## Results
 
-Dataset preparation, deterministic splits, training/evaluation and Colab workflow
-are implemented. **The real pretrained smoke test passes in both modes.**
-Full benchmark training is pending GPU execution; no scientific performance
-numbers or improvement claim are reported. The smoke test is a software check.
+**Fine-tuning improved held-out prediction in the completed seed-42 benchmark.**
+Both models were evaluated on the same 641 test variants after validation-based
+checkpoint selection.
+
+| Test metric | Frozen ESM-2 | Fine-tuned ESM-2 |
+|---|---:|---:|
+| Spearman ↑ | 0.201 | **0.716** |
+| Pearson ↑ | 0.227 | **0.728** |
+| MAE ↓ | 0.244 | **0.145** |
+| RMSE ↓ | 0.270 | **0.197** |
+
+MAE decreased by **40.4%** and RMSE by **27.0%** relative to this frozen baseline.
+Spearman measures ranking agreement, not percentage accuracy. Errors are in the
+original experimental fitness units.
+
+![Experimental versus predicted activity for both models](docs/results/seed42/figures/activity_predictions.png)
+
+This is one fixed split and seed, measuring interpolation within RgDAAO.
+The 310 mutated positions represented in test also occur in training with other
+substitutions; no exact variants or sequences overlap across splits.
+[Run evidence, learning curves and limitations](docs/results/seed42/README.md)
+include original predictions, metrics, configurations and execution records.
 
 ## Reproduce
 
@@ -66,6 +84,20 @@ The runner saves selected checkpoints, configuration, software environment,
 validation history, test metrics and `predictions.csv` per model. Scientific
 figures and `comparison.csv` are generated only after real test evaluation.
 Outputs go to `results/`; keep that folder or download the Colab results ZIP.
+The frozen run and fine-tuning run are sequential, each with 20 epochs and
+12,800 training steps; a progress-bar reset between them is expected.
+
+Inspect the published result without retraining or downloading model weights:
+
+```bash
+pip install -e ".[dev]"
+python scripts/verify_results.py
+```
+
+To regenerate its prediction figure, install the ML extras and run
+`python scripts/plot_results.py --results-dir docs/results/seed42`.
+Run verification before plotting: it checks the original imported artifacts;
+regenerated image bytes can vary with Matplotlib versions.
 
 Lightweight CI needs only `pip install -e ".[dev]"` and `pytest -q`; it never
 downloads pretrained weights or trains ESM-2. A separate data workflow verifies
@@ -78,5 +110,6 @@ Random single-variant splitting measures interpolation within one enzyme and
 can share mutated positions across splits. EP-Seq activity depends on cellular
 expression/folding as well as catalysis; it is not purified-enzyme kinetics.
 One split/seed cannot establish broad generalization, and model predictions do
-not demonstrate experimentally improved enzymes. The full comparison will be
-reported whether fine-tuning improves, matches or worsens the baseline.
+not demonstrate experimentally improved enzymes. The observed improvement applies
+to this benchmark and frozen-head baseline; it does not establish superiority to
+other representations or tuned baselines.

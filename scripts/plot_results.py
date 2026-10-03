@@ -53,6 +53,32 @@ def main():
     plt.close(fig)
     pd.DataFrame(rows).to_csv(args.results_dir / 'comparison.csv', index=False)
 
+    # Use epoch-end validation only: the last history record re-evaluates the
+    # restored checkpoint and must not be mistaken for a new epoch-20 result.
+    fig, ax = plt.subplots(figsize=(6.4, 3.8), constrained_layout=True)
+    for mode, run, title, color in zip(
+            ('frozen', 'finetune'), runs, ('Frozen ESM-2', 'Fine-tuned ESM-2'),
+            ('#176C91', '#C45B28')):
+        history = json.loads((args.results_dir / f'esm2_{mode}' / 'history.json').read_text())
+        epoch_records = {}
+        for record in history:
+            if 'eval_spearman' in record:
+                epoch_records.setdefault(record['step'], record)
+        records = sorted(epoch_records.values(), key=lambda r: r['step'])
+        ax.plot([r['epoch'] for r in records], [r['eval_spearman'] for r in records],
+                label=title, color=color, linewidth=2)
+        selected_step = int(run['best_checkpoint'].rsplit('-', 1)[1])
+        selected = epoch_records[selected_step]
+        ax.scatter(selected['epoch'], selected['eval_spearman'], color=color,
+                   marker='*', s=140, zorder=3)
+    ax.set(xlabel='Training epoch', ylabel='Validation Spearman',
+           title='Validation ranking during training')
+    ax.legend(frameon=False)
+    ax.grid(alpha=0.2)
+    for suffix in ('png', 'pdf'):
+        fig.savefig(out / f'validation_spearman.{suffix}')
+    plt.close(fig)
+
 
 if __name__ == '__main__':
     main()
